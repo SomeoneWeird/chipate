@@ -27,7 +27,7 @@ function CPU() {
 
   this.registers = {
     V:  new Array(16),
-    I:  0
+    I:  0,
     VF: 0,
     DT: 0,
     ST: 0
@@ -63,7 +63,7 @@ CPU.prototype.load = function(rom) {
   rom.forEach((d, i) => this.memory[this.romBase + i] = d);
 }
 
-CPU.prototype.readNext() {
+CPU.prototype.readNext = function() {
   return this.memory[this.PC++];
 }
 
@@ -366,3 +366,5 @@ CPU.prototype.stop = function() {
   clearTimeout(this.delayTimer);
   clearTimeout(this.soundTimer);
 }
+
+export default CPU;
