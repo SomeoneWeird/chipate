@@ -21,13 +21,15 @@ const fontSet = [
   0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 ];
 
-function CPU() {
+function CPU(rom) {
 
   this.clockSpeed = 100; // Hz
   this.fontBase   = 0x080;
   this.romBase    = 0x200;
 
   this.reset();
+
+  rom && this.load(rom);
 
 }
 
@@ -63,7 +65,11 @@ CPU.prototype.readNext = function() {
 CPU.prototype.step = function() {
 
   // operations are 2 bytes 
-  let op = this.readNext() + this.readNext();
+  let op = (this.readNext() << 8) + this.readNext();
+
+  if(!op) {
+    return;
+  }
 
   // MSB is the opcode
   let opcode = op & 0xF000;
@@ -121,7 +127,7 @@ CPU.prototype.step = function() {
       // 3xkk
       // skip next instruction if Vx == kk
 
-      if(this.registers.V[op & 0x0F00] === op & 0x00FF) {
+      if(this.registers.V[op & 0x0F00] === (op & 0x00FF)) {
         this.PC += 2;
       }
 
@@ -134,7 +140,7 @@ CPU.prototype.step = function() {
       // 4xkk
       // skip next instruction if Vx != kk
 
-      if(this.registers.V[op & 0x0F00] !== op & 0x00FF) {
+      if(this.registers.V[op & 0x0F00] !== (op & 0x00FF)) {
         this.PC += 2;
       }
 
@@ -147,7 +153,7 @@ CPU.prototype.step = function() {
       // 5xy0
       // skip next instruction if Vx == Vy
 
-      if(this.registers.V[op & 0x0F00] == this.registers.V[op & 0x00F0]) {
+      if(this.registers.V[op & 0x0F00] == this.registers.V[(op & 0x00F0) >> 4]) {
         this.PC += 2;
       }
 

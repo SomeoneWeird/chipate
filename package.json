@@ -4,7 +4,7 @@
   "description": "Chip8 emulator",
   "main": "cpu.js",
   "scripts": {
-    "test": "mocha -R spec --compilers js:babel/register"
+    "test": "mocha -R spec --compilers js:babel/register --bail"
   },
   "repository": {
     "type": "git",
