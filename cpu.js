@@ -46,9 +46,8 @@ CPU.prototype.reset = function() {
   this.stack  = new Array(16);
   this.memory = new Array(4096);
 
-  // load font into memory
-  for(var i = 0; i < this.fontBase.length; i++) {
-    this.memory[i] = fontSet[i];
+  for(var i = 0; i < fontSet.length; i++) {
+    this.memory[this.fontBase + i] = fontSet[i];
   }
 
 }
