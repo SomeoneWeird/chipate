@@ -28,7 +28,9 @@ function CPU() {
   this.registers = {
     V:  new Array(16),
     I:  0
-    VF: 0
+    VF: 0,
+    DT: 0,
+    ST: 0
   };
 
   this.PC = this.romBase;
@@ -44,6 +46,8 @@ CPU.prototype.reset = function() {
   this.registers.V = new Array(16);
   this.registers.I = 0;
   this.registers.VF = 0;
+  this.registers.DT = 0;
+  this.registers.ST = 0;
   this.PC = this.romBase;
   this.stack = [];
   this.memory = [];
@@ -341,10 +345,24 @@ CPU.prototype.run = function() {
 
   let frame = 1000 / this.speed;
 
-  this.clock = setInterval(() => this.step(), frame);
+  this.cpuTimer = setInterval(() => this.step(), frame);
+
+  this.delayTimer = setInterval(() => {
+    if(this.registers.DT)
+      this.registers.DT--;
+  }, frame);
+
+  this.soundTimer = setInterval(() => {
+    if(this.registers.ST) {
+      // play sound
+      this.registers.ST--;
+    }
+  }, frame);
 
 }
 
 CPU.prototype.stop = function() {
-  clearTimeout(this.clock);
+  clearTimeout(this.cpuTimer);
+  clearTimeout(this.delayTimer);
+  clearTimeout(this.soundTimer);
 }
