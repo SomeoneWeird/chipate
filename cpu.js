@@ -235,7 +235,11 @@ CPU.prototype.step = function() {
         }
 
         case 0x000A: {
-          // TODO
+
+          this.stop();
+          // TODO: block until input
+          this.run();
+
           break;
         }
 
@@ -260,17 +264,26 @@ CPU.prototype.step = function() {
         }
 
         case 0x0033: {
-          // TODO
+          let v = this.registers.V[op & 0x0F00];
+          this.memory[this.registers.I    ] = v & 0x0F00;
+          this.memory[this.registers.I + 1] = v & 0x00F0;
+          this.memory[this.registers.I + 2] = v & 0x000F;
           break;
         }
 
         case 0x0055: {
-          // TODO
+          let n = op & 0x0F00;
+          for(let i = 0; i < n; i++) {
+            this.memory[this.registers.I + i] = this.registers.V[i]
+          }
           break;
         }
 
         case 0x0065: {
-          // TODO
+          let n = op & 0x0F00;
+          for(let i = 0; i < n; i++) {
+            this.registers.V[i] = this.memory[this.registers.I + i];
+          }
           break;
         }
 
