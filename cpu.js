@@ -83,7 +83,7 @@ CPU.prototype.step = function() {
 
     case 0x5000: {
 
-      if(this.registers.V[op & 0x0F00] == this.reigsters.V[op & 0x00F0]) {
+      if(this.registers.V[op & 0x0F00] == this.registers.V[op & 0x00F0]) {
         this.PC += 2;
       }
 
@@ -107,7 +107,7 @@ CPU.prototype.step = function() {
 
     case 0x8000: {
 
-      let bit = 0x000F;
+      let bit = op & 0x000F;
 
       switch(bit) {
 
