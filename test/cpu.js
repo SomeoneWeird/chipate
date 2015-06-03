@@ -95,6 +95,21 @@ describe("Chip8 CPU", function() {
 
     describe("2nnn - CALL addr", function() {
 
+      it("should push PC to stack and set PC to addr", function() {
+
+        var cpu = new CPU([
+          0x21, 0x23
+        ]);
+
+        assert.equal(cpu.PC, 0x200);
+
+        cpu.step();
+
+        assert.equal(cpu.PC, 0x123);
+        assert.equal(cpu.stack[0], 0x202);
+
+      });
+
     });
 
     describe("3xkk - SE Vx, byte", function() {

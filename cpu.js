@@ -45,7 +45,7 @@ CPU.prototype.reset = function() {
 
   this.PC = this.romBase;
 
-  this.stack  = new Array(16);
+  this.stack  = [];
   this.memory = new Array(4096);
 
   for(var i = 0; i < fontSet.length; i++) {
