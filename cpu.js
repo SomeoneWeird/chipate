@@ -166,7 +166,7 @@ CPU.prototype.step = function() {
       // 6xkk
       // Load value kk into Vx
 
-      this.registers.V[op & 0x0F00] = op & 0x00FF;
+      this.registers.V[(op & 0x0F00) >> 8] = op & 0x00FF;
       break;
 
     }
@@ -176,7 +176,7 @@ CPU.prototype.step = function() {
       // 7xkk
       // Add value kk to Vx
 
-      this.registers.V[op & 0x0F00] = this.registers.V[op & 0x0F00] + op & 0x00FF;
+      this.registers.V[(op & 0x0F00) >> 8] += op & 0x00FF;
       break;
 
     }
@@ -188,33 +188,36 @@ CPU.prototype.step = function() {
 
       let bit = op & 0x000F;
 
+      let x = (op & 0x0F00) >> 8;
+      let y = (op & 0x00F0) >> 4;
+
       switch(bit) {
 
         case 0x0000: {
           // 8xy0
           // Sets register Vx to value of Vy
-          this.registers.V[op & 0x0F00] = this.registers.V[op & 0x00F0];
+          this.registers.V[x] = this.registers.V[y];
           break;
         }
 
         case 0x0001: {
           // 8xy1
           // OR Vx and Vy
-          this.registers.V[op & 0x0F00] = this.registers.V[op & 0x0F00] | this.registers.V[op & 0x00F0];
+          this.registers.V[x] |= this.registers.V[y];
           break;
         }
 
         case 0x0002: {
           // 8xy2
           // AND Vx and Vy
-          this.registers.V[op & 0x0F00] = this.registers.V[op & 0x0F00] & this.registers.V[op & 0x00F0];
+          this.registers.V[x] &= this.registers.V[y];
           break;
         }
 
         case 0x0003: {
           // 8xy3
           // XOR Vx and Vy
-          this.registers.V[op & 0x0F00] = this.registers.V[op & 0x0F00] ^ this.registers.V[op & 0x00F0];
+          this.registers.V[x] ^= this.registers.V[y];
           break;
         }
 
@@ -222,9 +225,9 @@ CPU.prototype.step = function() {
           // 8xy4
           // Add Vx and Vy, if the result is greater than 255
           // set the VF flag, only keep the lowest 8 bits.
-          let v = this.registers.V[op & 0x0F00] + this.registers.V[op & 0x00F0];
-          this.registers.VF = v > 0xFF ? 1 : 0;
-          this.registers.V[op & 0x0F00] = v & 0xFF;
+          let v = this.registers.V[x] + this.registers.V[y];
+          this.registers.VF = (v > 0xFF) ? 1 : 0;
+          this.registers.V[x] = v & 0xFF;
           break;
         }
 
@@ -232,10 +235,10 @@ CPU.prototype.step = function() {
           // 8xy5
           // If Vx > Vy set VF flag, then subtract 
           // Vy from Vx and store the result in Vx.
-          let x = this.registers.V[op & 0x0F00];
-          let y = this.registers.V[op & 0x00F0];
-          this.registers.VF = x > y;
-          this.registers.V[op & 0x0F00] = x - y;
+          let Vx = this.registers.V[x];
+          let Vy = this.registers.V[y];
+          this.registers.VF = (Vx > Vy) ? 1 : 0;
+          this.registers.V[x] = Vx - Vy;
           break;
         }
 
@@ -245,9 +248,8 @@ CPU.prototype.step = function() {
           // then divide Vx by 2.
 
           // unsure if this is correct TODO
-          let bit = this.registers.V[op & 0x0F00] & 0x0F;
-          this.registers.VF = bit === 1 ? 1 : 0;
-          this.registers.V[op & 0x0F00] /= 2;
+          this.registers.VF = this.registers.V[x] & 0x1;
+          this.registers.V[x] = Math.floor(this.registers.V[x] / 2);
           break;
         }
 
@@ -255,10 +257,10 @@ CPU.prototype.step = function() {
           // 8xy7
           // If Vx > Vy set VF flag, then subtract 
           // Vx from Vy and store the result in Vx.
-          let x = this.registers.V[op & 0x0F00];
-          let y = this.registers.V[op & 0x00F0];
-          this.registers.VF = y > x;
-          this.registers.V[0x0F00] = y - x;
+          let Vx = this.registers.V[x];
+          let Vy = this.registers.V[y];
+          this.registers.VF = Vy > Vx;
+          this.registers.V[x] = Vy - Vx;
           break;
         }
 
@@ -268,9 +270,9 @@ CPU.prototype.step = function() {
           // then multiply Vx by 2.
 
           // unsure if this is correct TODO
-          let bit = this.registers.V[op & 0x0F00] & 0xF0;
+          let bit = this.registers.V[x] & 0xF0;
           this.registers.VF = bit === 1 ? 1 : 0;
-          this.registers.V[op & 0x0F00] *= 2;
+          this.registers.V[x] *= 2;
           break;
         }
 
@@ -293,8 +295,8 @@ CPU.prototype.step = function() {
     case 0xB000: {
 
       // Bnnn
-      // Jump to nnn + V0
-      this.SP = (op & 0x0FFF) + this.registers.V[0];
+      // PC is set to nnn + V0
+      this.PC = (op & 0x0FFF) + this.registers.V[0];
       break;
 
     }
@@ -304,7 +306,7 @@ CPU.prototype.step = function() {
       // Cxkk
       // Generate a random byte between 0 and 0xFF
       // AND with kk, then store result in Vx.
-      this.registers.V[0x0F00] = Math.floor(Math.random() * 0x100) & (op & 0x0FF);
+      this.registers.V[0x0F00] = Math.floor(Math.random() * 0x100) & (op & 0x00FF);
       break;
 
     }
@@ -361,7 +363,8 @@ CPU.prototype.step = function() {
           // Fx07
           // Set Vx to DT
 
-          // TODO
+          let x = (op & 0x0F00) >> 8;
+          this.registers.V[x] = this.registers.DT;
           break;
         }
 
@@ -382,15 +385,16 @@ CPU.prototype.step = function() {
           // Fx15
           // Set DT to Vx
 
-          // TODO
+          let x = (op & 0x0F00) >> 8;
+          this.registers.DT = this.registers.V[x];
           break;
         }
 
         case 0x0018: {
           // Fx18
           // Set ST to Vx
-
-          // TODO
+          let x = (op & 0x0F00) >> 8;
+          this.registers.ST = this.registers.V[x];
           break;
         }
 
@@ -441,6 +445,8 @@ CPU.prototype.step = function() {
         }
 
       }
+
+      break;
 
     }
 

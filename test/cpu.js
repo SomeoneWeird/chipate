@@ -201,98 +201,468 @@ describe("Chip8 CPU", function() {
 
     });
 
+    describe("6xkk - LD Vx, kk", function() {
+
+      it("should set register to value", function() {
+
+        let cpu = new CPU([
+          0x65, 0x11
+        ]);
+
+        assert.equal(cpu.registers.V[5], undefined);
+
+        cpu.step();
+
+        assert.equal(cpu.registers.V[5], 0x11);
+
+      });
+
+    });
+
     describe("7xkk - ADD Vx, byte", function() {
 
+      it("should add value to register", function() {
+
+        let cpu = new CPU([
+          0x74, 0x11
+        ]);
+
+        cpu.registers.V[4] = 0x22;
+
+        cpu.step();
+
+        assert.equal(cpu.registers.V[4], 0x33);
+
+      });
 
     });
 
-    describe("8xy1 - OR Vx, Vy", function() {
+    describe("8xyn", function() {
 
+      describe("8xy0 - SET Vx, Vy", function() {
 
-    });
+        it("should set register Vx to Vy", function() {
 
-    describe("8xy2 - AND Vx, Vy", function() {
+          let cpu = new CPU([
+            0x81, 0x20 // SET V1 to V2
+          ]);
 
+          cpu.registers.V[2] = 0x10;
 
-    });
+          cpu.step();
 
-    describe("8xy3 - XOR Vx, Vy", function() {
+          assert.equal(cpu.registers.V[1], cpu.registers.V[2]);
 
+        });
 
-    });
+      });
 
-    describe("8xy4 - ADD Vx, Vy", function() {
+      describe("8xy1 - OR Vx, Vy", function() {
 
+        it("should OR registers Vx with Vy", function() {
 
-    });
+          let cpu = new CPU([
+            0x81, 0x21 // OR V1 with V2
+          ]);
 
-    describe("8xy5 - SUB Vx, Vy", function() {
+          cpu.registers.V[1] = 0x80;
+          cpu.registers.V[2] = 0x13;
 
+          cpu.step();
 
-    });
+          assert.equal(cpu.registers.V[1], 0x80 | 0x13);
 
-    describe("8xy6 - SHR Vx", function() {
+        });
 
+      });
 
-    });
+      describe("8xy2 - AND Vx, Vy", function() {
 
-    describe("8xy7 - SUBN Vx, Vy", function() {
+        it("should AND registers Vx with Vy", function() {
 
+          let cpu = new CPU([
+            0x81, 0x22 // AND V1 with V2
+          ]);
 
-    });
+          cpu.registers.V[1] = 0x80;
+          cpu.registers.V[2] = 0x13;
 
-    describe("8xyE - SHL Vx", function() {
+          cpu.step();
 
+          assert.equal(cpu.registers.V[1], 0x80 & 0x13);
+
+        });
+
+      });
+
+      describe("8xy3 - XOR Vx, Vy", function() {
+
+        it("should XOR registers Vx with Vy", function() {
+
+          let cpu = new CPU([
+            0x81, 0x23 // XOR V1 with V2
+          ]);
+
+          cpu.registers.V[1] = 0x80;
+          cpu.registers.V[2] = 0x13;
+
+          cpu.step();
+
+          assert.equal(cpu.registers.V[1], 0x80 ^ 0x13);
+
+        });
+
+      });
+
+      describe("8xy4 - ADD Vx, Vy", function() {
+
+        it("should ADD registers Vx with Vy", function() {
+
+          let cpu = new CPU([
+            0x81, 0x24 // ADD V2 to V1
+          ]);
+
+          cpu.registers.V[1] = 0x01;
+          cpu.registers.V[2] = 0x02;
+
+          cpu.step();
+
+          assert.equal(cpu.registers.V[1], 0x03);
+
+        });
+
+        it("should set VF is result is over 255", function() {
+
+          let cpu = new CPU([
+            0x81, 0x24 // ADD V2 to V1
+          ]);
+
+          cpu.registers.V[1] = 0xFF;
+          cpu.registers.V[2] = 0x02;
+          cpu.registers.VF = 0;
+
+          cpu.step();
+
+          assert.equal(cpu.registers.V[1], 0x01);
+          assert.equal(cpu.registers.VF, 1);
+
+        });
+
+      });
+
+      describe("8xy5 - SUB Vx, Vy", function() {
+
+        it("should subtract Vy from Vx", function() {
+
+          let cpu = new CPU([
+            0x85, 0x65 // SUB V2 from V1
+          ]);
+
+          cpu.registers.V[5] = 0xFF;
+          cpu.registers.V[6] = 0x0F;
+          assert.equal(cpu.registers.VF, 0);
+
+          cpu.step();
+
+          assert.equal(cpu.registers.V[5], 0xFF - 0x0F);
+          assert.equal(cpu.registers.VF, 1);
+
+        });
+
+        it("should not set VF flag if Vy > Vx", function() {
+
+          let cpu = new CPU([
+            0x85, 0x65 // SUB
+          ]);
+
+          cpu.registers.V[5] = 0xF0;
+          cpu.registers.V[6] = 0xFF;
+
+          assert.equal(cpu.registers.VF, 0);
+
+          cpu.step();
+
+          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[5], 0xF0 - 0xFF);
+
+        });
+
+      });
+
+      describe("8xy6 - SHR Vx", function() {
+
+        it("should divide Vx by 2", function() {
+
+          var cpu = new CPU([
+            0x81, 0x06
+          ]);
+
+          cpu.registers.V[1] = 0x04;
+
+          assert.equal(cpu.registers.VF, 0);
+
+          cpu.step();
+
+          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[1], 0x02);
+
+        });
+
+        it("should set VF if LSB of Vx is 1", function() {
+
+          var cpu = new CPU([
+            0x81, 0x06
+          ]);
+
+          cpu.registers.V[1] = 0x01;
+
+          assert.equal(cpu.registers.VF, 0);
+
+          cpu.step();
+
+          assert.equal(cpu.registers.VF, 1);
+          assert.equal(cpu.registers.V[1], 0x00);  
+
+        });
+
+        it("should set VF if LSB of Vx is 1", function() {
+
+          var cpu = new CPU([
+            0x81, 0x06
+          ]);
+
+          cpu.registers.V[1] = 0x01;
+
+          assert.equal(cpu.registers.VF, 0);
+
+          cpu.step();
+
+          assert.equal(cpu.registers.VF, 1);
+          assert.equal(cpu.registers.V[1], 0x00);  
+
+        });
+
+      });
+
+      describe("8xy7 - SUBN Vx, Vy", function() {
+
+        it("should subtract Vx from Vy", function() {
+
+          let cpu = new CPU([
+            0x85, 0x67 // SUB V2 from V1
+          ]);
+
+          cpu.registers.V[5] = 0x0F;
+          cpu.registers.V[6] = 0xFF;
+          assert.equal(cpu.registers.VF, 0);
+
+          cpu.step();
+
+          assert.equal(cpu.registers.V[5], 0xFF - 0x0F);
+          assert.equal(cpu.registers.VF, 1);
+
+        });
+
+        it("should not set VF flag if Vx > Vy", function() {
+
+          let cpu = new CPU([
+            0x85, 0x67 // SUB
+          ]);
+
+          cpu.registers.V[5] = 0xFF;
+          cpu.registers.V[6] = 0xF0;
+
+          assert.equal(cpu.registers.VF, 0);
+
+          cpu.step();
+
+          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[5], 0xF0 - 0xFF);
+
+        });
+
+      });
+
+      describe("8xyE - SHL Vx", function() {
+
+        // TODO
+
+      });
 
     });
 
     describe("9xy0 - SNE Vx, Vy", function() {
 
+      // TODO
+
+    });
+
+    describe("Annn - LD I, addr", function() {
+
+      it("should set I to address", function() {
+
+        var cpu = new CPU([
+          0xA1, 0x32
+        ]);
+
+        assert.equal(cpu.registers.I, 0);
+
+        cpu.step();
+
+        assert.equal(cpu.registers.I, 0x132)
+
+      });
+
+    });
+
+    describe("Bnnn, LD PC, addr + V0", function() {
+
+      it("should set PC to address plus V0", function() {
+
+        var cpu = new CPU([
+          0xBF, 0xF0
+        ]);
+
+        cpu.registers.V[0] = 0x0F;
+
+        assert.equal(cpu.PC, 0x200);
+
+        cpu.step();
+
+        assert.equal(cpu.PC, 0xFFF);
+
+      });
 
     });
 
     describe("Cxkk - RND Vx, byte", function() {
 
+      // TODO: how do I test this? make sure it's diff each time?
 
     });
 
     describe("Dxyn - DRW Vx, Vy, n", function() {
 
+      // TODO
 
     });
 
     describe("Ex9E - SKP Vx", function() {
 
+      // TODO
 
     });
 
     describe("ExA1 - SKNP Vx", function() {
 
+      // TODO
+
+    });
+
+    describe("Fx07 - LD Vx, DT", function() {
+
+      it("should load value of DT into Vx", function() {
+
+        var cpu = new CPU([
+          0xF5, 0x07
+        ]);
+
+        cpu.registers.DT = 0x05;
+
+        cpu.step();
+
+        assert.equal(cpu.registers.V[5], 0x05);
+
+      });
 
     });
 
     describe("Fx0A - LD Vx, K", function() {
 
+      // TODO
+
+    });
+
+    describe("Fx15 - LD DT, Vx", function() {
+
+      it("should set DT to Vx", function() {
+
+        var cpu = new CPU([
+          0xF7, 0x15
+        ]);
+
+        cpu.registers.V[7] = 0x05;
+
+        assert.equal(cpu.registers.V[7], 0x05);
+
+        cpu.step();
+
+        assert.equal(cpu.registers.DT, 0x05);
+
+      });
+
+    });
+
+    describe("Fx18 - LD ST, Vx", function() {
+
+      it("should set ST to Vx", function() {
+
+        var cpu = new CPU([
+          0xF4, 0x18
+        ]);
+
+        cpu.registers.V[4] = 0x03;
+
+        assert.equal(cpu.registers.V[4], 0x03);
+
+        cpu.step();
+
+        assert.equal(cpu.registers.ST, 0x03);
+
+      });
+
+    });
+
+    describe("0xFx1E - ADD I, Vx", function() {
+
+      xit("should add Vx to I", function() {
+
+        var cpu = new CPU([
+          0xF1, 0x1E
+        ]);
+
+        cpu.registers.I = 0x01;
+        cpu.registers.V[1] = 0x05;
+
+        cpu.step();
+
+        assert.equal(cpu.registers.I, 0x06);
+
+      });
 
     });
 
     describe("Fx29 - LD F, Vx", function() {
 
+      // TODO
 
     });
 
     describe("Fx33 - LD B, Vx", function() {
 
+      // TODO
 
     });
 
     describe("Fx55 - LD [I], Vx", function() {
 
+      // TODO
 
     });
 
     describe("Fx65 - LD Vx, [I]", function() {
 
+      // TODO
 
     });
 
