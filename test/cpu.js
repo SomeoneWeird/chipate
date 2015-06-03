@@ -599,7 +599,20 @@ describe("Chip8 CPU", function() {
 
     describe("Cxkk - RND Vx, byte", function() {
 
-      // TODO: how do I test this? make sure it's diff each time?
+      it("should return a number and then a different number", function() {
+
+        var cpu = new CPU([
+          0xC0, 0xFF,
+          0xC1, 0xFF
+        ]);
+
+        assert.equal(cpu.registers.V[0], undefined);
+
+        cpu.step();
+
+        assert.notEqual(cpu.registers.V[0], cpu.registers.V[1]);
+
+      });
 
     });
 
