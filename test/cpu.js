@@ -687,7 +687,7 @@ describe("Chip8 CPU", function() {
 
     describe("0xFx1E - ADD I, Vx", function() {
 
-      xit("should add Vx to I", function() {
+      it("should add Vx to I", function() {
 
         var cpu = new CPU([
           0xF1, 0x1E
@@ -750,13 +750,53 @@ describe("Chip8 CPU", function() {
 
     describe("Fx55 - LD [I], Vx", function() {
 
-      // TODO
+      it("should load registers into memory", function() {
+
+        var cpu = new CPU([
+          0xF5, 0x55
+        ]);
+
+        cpu.registers.V[0] = 0x10;
+        cpu.registers.V[1] = 0x20;
+        cpu.registers.V[2] = 0x30;
+        cpu.registers.V[3] = 0x40;
+        cpu.registers.V[4] = 0x50;
+
+        cpu.registers.I = 0x250;
+
+        cpu.step();
+
+        assert.equal(cpu.memory[0x250], 0x10);
+        assert.equal(cpu.memory[0x251], 0x20);
+        assert.equal(cpu.memory[0x252], 0x30);
+        assert.equal(cpu.memory[0x253], 0x40);
+        assert.equal(cpu.memory[0x254], 0x50);
+
+      });
 
     });
 
     describe("Fx65 - LD Vx, [I]", function() {
 
-      // TODO
+      it("should load memory into registers", function() {
+
+        var cpu = new CPU([
+          0xF3, 0x65
+        ]);
+
+        cpu.registers.I = 0x250;
+
+        cpu.memory[0x250] = 0x10;
+        cpu.memory[0x251] = 0x20;
+        cpu.memory[0x252] = 0x30;
+
+        cpu.step();
+
+        assert.equal(cpu.registers.V[0], 0x10);
+        assert.equal(cpu.registers.V[1], 0x20);
+        assert.equal(cpu.registers.V[2], 0x30);
+
+      });
 
     });
 

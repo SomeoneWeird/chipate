@@ -411,7 +411,7 @@ CPU.prototype.step = function() {
         case 0x001E: {
           // Fx1E
           // Add Vx to I
-          this.registers.I += this.registers.V[op & 0x0F00];
+          this.registers.I += this.registers.V[(op & 0x0F00) >> 8];
           break;
         }
 
@@ -439,9 +439,9 @@ CPU.prototype.step = function() {
         case 0x0055: {
           // Fx55
           // Store registers V0 -> Vx into memory starting at I
-          let n = op & 0x0F00;
+          let n = (op & 0x0F00) >> 8;
           for(let i = 0; i < n; i++) {
-            this.memory[this.registers.I + i] = this.registers.V[i]
+            this.memory[this.registers.I + i] = this.registers.V[i];
           }
           break;
         }
@@ -449,7 +449,7 @@ CPU.prototype.step = function() {
         case 0x0065: {
           // Fx65
           // Store memory starting at I into registers V0 -> Vx
-          let n = op & 0x0F00;
+          let n = (op & 0x0F00) >> 8;
           for(let i = 0; i < n; i++) {
             this.registers.V[i] = this.memory[this.registers.I + i];
           }
