@@ -132,7 +132,7 @@ CPU.prototype.step = function() {
       // 3xkk
       // skip next instruction if Vx == kk
 
-      if(this.registers.V[op & 0x0F00] === (op & 0x00FF)) {
+      if(this.registers.V[(op & 0x0F00) >> 8] === (op & 0x00FF)) {
         this.PC += 2;
       }
 
@@ -145,7 +145,7 @@ CPU.prototype.step = function() {
       // 4xkk
       // skip next instruction if Vx != kk
 
-      if(this.registers.V[op & 0x0F00] !== (op & 0x00FF)) {
+      if(this.registers.V[(op & 0x0F00) >> 8] !== (op & 0x00FF)) {
         this.PC += 2;
       }
 
@@ -158,7 +158,7 @@ CPU.prototype.step = function() {
       // 5xy0
       // skip next instruction if Vx == Vy
 
-      if(this.registers.V[op & 0x0F00] == this.registers.V[(op & 0x00F0) >> 4]) {
+      if(this.registers.V[(op & 0x0F00) >> 8] == this.registers.V[(op & 0x00F0) >> 4]) {
         this.PC += 2;
       }
 
