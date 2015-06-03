@@ -117,6 +117,11 @@ CPU.prototype.step = function() {
       // and call a subroute at nnn
 
       this.stack.push(this.PC);
+
+      if(this.stack.length > 16) {
+        throw new Error("Stack length is over 16, aborting.");
+      }
+
       this.PC = op & 0xFFF;
       break;
 
