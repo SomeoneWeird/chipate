@@ -80,7 +80,7 @@ describe("Chip8 CPU", function() {
       it("should jump to address", function() {
 
         let cpu = new CPU([
-          0x14, 0x56 // JMP to 0x456  
+          0x14, 0x56 // JMP to 0x456
         ]);
 
         assert.equal(cpu.PC, 0x200);
@@ -421,7 +421,7 @@ describe("Chip8 CPU", function() {
           cpu.step();
 
           assert.equal(cpu.registers.VF, 1);
-          assert.equal(cpu.registers.V[1], 0x00);  
+          assert.equal(cpu.registers.V[1], 0x00);
 
         });
 
@@ -438,7 +438,7 @@ describe("Chip8 CPU", function() {
           cpu.step();
 
           assert.equal(cpu.registers.VF, 1);
-          assert.equal(cpu.registers.V[1], 0x00);  
+          assert.equal(cpu.registers.V[1], 0x00);
 
         });
 
@@ -650,7 +650,25 @@ describe("Chip8 CPU", function() {
 
     describe("Fx33 - LD B, Vx", function() {
 
-      // TODO
+      it("should store individual digits of a BCD (Binary Coded Digit) in register I, I+1, I+2", function() {
+
+        var cpu = new CPU([
+          0xF4, 0x33
+        ]);
+
+        cpu.registers.I = 0x100;
+        cpu.registers.V[4] = 0x543;
+
+        assert.equal(cpu.memory[0x100], undefined);
+        assert.equal(cpu.memory[0x101], undefined);
+        assert.equal(cpu.memory[0x102], undefined);
+
+        cpu.step();
+
+        assert.equal(cpu.memory[0x100], 5);
+        assert.equal(cpu.memory[0x101], 4);
+        assert.equal(cpu.memory[0x102], 3);
+      });
 
     });
 

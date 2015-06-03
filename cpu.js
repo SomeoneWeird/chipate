@@ -31,7 +31,7 @@ function CPU(rom) {
 
   rom && this.load(rom);
 
-}
+};
 
 CPU.prototype.reset = function() {
 
@@ -52,19 +52,19 @@ CPU.prototype.reset = function() {
     this.memory[this.fontBase + i] = fontSet[i];
   }
 
-}
+};
 
 CPU.prototype.load = function(rom) {
   rom.forEach((d, i) => this.memory[this.romBase + i] = d);
-}
+};
 
 CPU.prototype.readNext = function() {
   return this.memory[this.PC++];
-}
+};
 
 CPU.prototype.step = function() {
 
-  // operations are 2 bytes 
+  // operations are 2 bytes
   let op = (this.readNext() << 8) + this.readNext();
 
   if(!op) {
@@ -233,7 +233,7 @@ CPU.prototype.step = function() {
 
         case 0x0005: {
           // 8xy5
-          // If Vx > Vy set VF flag, then subtract 
+          // If Vx > Vy set VF flag, then subtract
           // Vy from Vx and store the result in Vx.
           let Vx = this.registers.V[x];
           let Vy = this.registers.V[y];
@@ -255,7 +255,7 @@ CPU.prototype.step = function() {
 
         case 0x0007: {
           // 8xy7
-          // If Vx > Vy set VF flag, then subtract 
+          // If Vx > Vy set VF flag, then subtract
           // Vx from Vy and store the result in Vx.
           let Vx = this.registers.V[x];
           let Vy = this.registers.V[y];
@@ -417,10 +417,11 @@ CPU.prototype.step = function() {
         case 0x0033: {
           // Fx33
           // Get value from Vx, store each digit in I, I+1 & I+2
-          let v = this.registers.V[op & 0x0F00];
-          this.memory[this.registers.I    ] = v & 0x0F00;
-          this.memory[this.registers.I + 1] = v & 0x00F0;
-          this.memory[this.registers.I + 2] = v & 0x000F;
+          let x = (op & 0x0F00) >> 8;
+          let v = this.registers.V[x];
+          this.memory[this.registers.I    ] = (v & 0xF00) >> 8;
+          this.memory[this.registers.I + 1] = (v & 0x0F0) >> 4;
+          this.memory[this.registers.I + 2] = (v & 0x00F);
           break;
         }
 
@@ -456,7 +457,7 @@ CPU.prototype.step = function() {
 
   }
 
-}
+};
 
 CPU.prototype.run = function() {
 
@@ -476,12 +477,12 @@ CPU.prototype.run = function() {
     }
   }, frame);
 
-}
+};
 
 CPU.prototype.stop = function() {
   clearTimeout(this.cpuTimer);
   clearTimeout(this.delayTimer);
   clearTimeout(this.soundTimer);
-}
+};
 
 export default CPU;
