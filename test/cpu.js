@@ -485,7 +485,39 @@ describe("Chip8 CPU", function() {
 
       describe("8xyE - SHL Vx", function() {
 
-        // TODO
+        it("should multiply Vx by 2", function() {
+
+          var cpu = new CPU([
+            0x81, 0x0E
+          ]);
+
+          cpu.registers.V[1] = 0x04;
+
+          assert.equal(cpu.registers.VF, 0);
+
+          cpu.step();
+
+          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[1], 0x08);
+
+        });
+
+        it("should set VF if MSB of Vx is 1", function() {
+
+          var cpu = new CPU([
+            0x81, 0x0E
+          ]);
+
+          cpu.registers.V[1] = 0xF0;
+
+          assert.equal(cpu.registers.VF, 0);
+
+          cpu.step();
+
+          assert.equal(cpu.registers.VF, 1);
+          assert.equal(cpu.registers.V[1], 0xE0);
+
+        });
 
       });
 
@@ -493,7 +525,37 @@ describe("Chip8 CPU", function() {
 
     describe("9xy0 - SNE Vx, Vy", function() {
 
-      // TODO
+      it("should skip instruction", function() {
+
+        let cpu = new CPU([
+          0x90, 0x10, // Skip next if Vx != Vy
+          0x14, 0x56 // JMP
+        ]);
+
+        cpu.registers.V[0] = 0;
+        cpu.registers.V[1] = 1;
+
+        cpu.step();
+
+        assert.equal(cpu.PC, 0x204);
+
+      });
+
+      it("should not skip instruction", function() {
+
+        let cpu = new CPU([
+          0x90, 0x10,
+          0x14, 0x56
+        ]);
+
+        cpu.registers.V[0] = 0;
+        cpu.registers.V[1] = 0;
+
+        cpu.step();
+
+        assert.equal(cpu.PC, 0x202);
+
+      });
 
     });
 
@@ -644,7 +706,21 @@ describe("Chip8 CPU", function() {
 
     describe("Fx29 - LD F, Vx", function() {
 
-      // TODO
+      it("should set I to location of sprite for value of Vx", function() {
+
+        var cpu = new CPU([
+          0xFC, 0x29
+        ]);
+
+        cpu.registers.V[0xC] = 0xA;
+
+        assert.equal(cpu.registers.I, 0);
+
+        cpu.step();
+
+        assert.equal(cpu.registers.I, 0x32 + cpu.fontBase);
+
+      });
 
     });
 

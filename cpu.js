@@ -244,12 +244,10 @@ CPU.prototype.step = function() {
 
         case 0x0006: {
           // 8xy6
-          // If LSB of Vx is 1, set VF
-          // then divide Vx by 2.
-
-          // unsure if this is correct TODO
+          // If LSB of Vx is 1, set VF to 1 otherwise 0.
+          // Then divide Vx by 2.
           this.registers.VF = this.registers.V[x] & 0x1;
-          this.registers.V[x] = Math.floor(this.registers.V[x] / 2);
+          this.registers.V[x] >>= 1;
           break;
         }
 
@@ -268,17 +266,24 @@ CPU.prototype.step = function() {
           // 8xyE
           // If MSB of Vx is 1, set VF
           // then multiply Vx by 2.
-
-          // unsure if this is correct TODO
-          let bit = this.registers.V[x] & 0xF0;
-          this.registers.VF = bit === 1 ? 1 : 0;
-          this.registers.V[x] *= 2;
+          this.registers.VF = ((this.registers.V[x] & 0x80) === 0x80) ? 1 : 0;
+          this.registers.V[x] = (this.registers.V[x] << 1) & 0xFF;
           break;
         }
 
       }
 
       break;
+
+    }
+
+    case 0x9000: {
+
+      // 9xy0
+      // Skip next instruction if Vx != Vy
+      if(this.registers.V[(op & 0x0F00) >> 8] != this.registers.V[(op & 0x00F0) >> 4]) {
+        this.PC += 2;
+      }
 
     }
 
@@ -409,8 +414,9 @@ CPU.prototype.step = function() {
           // Fx29
           // Set I to location of sprite for
           // digit Vx
+          let x = (op & 0x0F00) >> 8;
+          this.registers.I = (this.registers.V[x] * 5) + this.fontBase;
 
-          // TODO
           break;
         }
 
