@@ -352,14 +352,14 @@ describe("Chip8 CPU", function() {
             0x81, 0x24 // ADD V2 to V1
           ]);
 
-          cpu.registers.V[1] = 0xFF;
-          cpu.registers.V[2] = 0x02;
-          cpu.registers.VF = 0;
+          cpu.registers.V[1]   = 0xFF;
+          cpu.registers.V[2]   = 0x02;
+          cpu.registers.V[0xF] = 0;
 
           cpu.step();
 
           assert.equal(cpu.registers.V[1], 0x01);
-          assert.equal(cpu.registers.VF, 1);
+          assert.equal(cpu.registers.V[0xF], 1);
 
         });
 
@@ -375,12 +375,12 @@ describe("Chip8 CPU", function() {
 
           cpu.registers.V[5] = 0xFF;
           cpu.registers.V[6] = 0x0F;
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], undefined);
 
           cpu.step();
 
           assert.equal(cpu.registers.V[5], 0xFF - 0x0F);
-          assert.equal(cpu.registers.VF, 1);
+          assert.equal(cpu.registers.V[0xF], 1);
 
         });
 
@@ -393,11 +393,11 @@ describe("Chip8 CPU", function() {
           cpu.registers.V[5] = 0xF0;
           cpu.registers.V[6] = 0xFF;
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], undefined);
 
           cpu.step();
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], 0);
           assert.equal(cpu.registers.V[5], 0xF0 - 0xFF);
 
         });
@@ -414,11 +414,11 @@ describe("Chip8 CPU", function() {
 
           cpu.registers.V[1] = 0x04;
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], undefined);
 
           cpu.step();
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], 0);
           assert.equal(cpu.registers.V[1], 0x02);
 
         });
@@ -431,11 +431,11 @@ describe("Chip8 CPU", function() {
 
           cpu.registers.V[1] = 0x01;
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], undefined);
 
           cpu.step();
 
-          assert.equal(cpu.registers.VF, 1);
+          assert.equal(cpu.registers.V[0xF], 1);
           assert.equal(cpu.registers.V[1], 0x00);
 
         });
@@ -448,11 +448,11 @@ describe("Chip8 CPU", function() {
 
           cpu.registers.V[1] = 0x01;
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], undefined);
 
           cpu.step();
 
-          assert.equal(cpu.registers.VF, 1);
+          assert.equal(cpu.registers.V[0xF], 1);
           assert.equal(cpu.registers.V[1], 0x00);
 
         });
@@ -469,12 +469,12 @@ describe("Chip8 CPU", function() {
 
           cpu.registers.V[5] = 0x0F;
           cpu.registers.V[6] = 0xFF;
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], undefined);
 
           cpu.step();
 
           assert.equal(cpu.registers.V[5], 0xFF - 0x0F);
-          assert.equal(cpu.registers.VF, 1);
+          assert.equal(cpu.registers.V[0xF], 1);
 
         });
 
@@ -487,11 +487,11 @@ describe("Chip8 CPU", function() {
           cpu.registers.V[5] = 0xFF;
           cpu.registers.V[6] = 0xF0;
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], undefined);
 
           cpu.step();
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], 0);
           assert.equal(cpu.registers.V[5], 0xF0 - 0xFF);
 
         });
@@ -508,11 +508,11 @@ describe("Chip8 CPU", function() {
 
           cpu.registers.V[1] = 0x04;
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], undefined);
 
           cpu.step();
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], 0);
           assert.equal(cpu.registers.V[1], 0x08);
 
         });
@@ -525,11 +525,11 @@ describe("Chip8 CPU", function() {
 
           cpu.registers.V[1] = 0xF0;
 
-          assert.equal(cpu.registers.VF, 0);
+          assert.equal(cpu.registers.V[0xF], undefined);
 
           cpu.step();
 
-          assert.equal(cpu.registers.VF, 1);
+          assert.equal(cpu.registers.V[0xF], 1);
           assert.equal(cpu.registers.V[1], 0xE0);
 
         });

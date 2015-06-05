@@ -38,7 +38,6 @@ CPU.prototype.reset = function() {
   this.registers = {
     V:  new Array(16),
     I:  0,
-    VF: 0,
     DT: 0,
     ST: 0
   };
@@ -231,7 +230,7 @@ CPU.prototype.step = function() {
           // Add Vx and Vy, if the result is greater than 255
           // set the VF flag, only keep the lowest 8 bits.
           let v = this.registers.V[x] + this.registers.V[y];
-          this.registers.VF = (v > 0xFF) ? 1 : 0;
+          this.registers.V[0xF] = (v > 0xFF) ? 1 : 0;
           this.registers.V[x] = v & 0xFF;
           break;
         }
@@ -242,7 +241,7 @@ CPU.prototype.step = function() {
           // Vy from Vx and store the result in Vx.
           let Vx = this.registers.V[x];
           let Vy = this.registers.V[y];
-          this.registers.VF = (Vx > Vy) ? 1 : 0;
+          this.registers.V[0xF] = (Vx > Vy) ? 1 : 0;
           this.registers.V[x] = Vx - Vy;
           break;
         }
@@ -251,7 +250,7 @@ CPU.prototype.step = function() {
           // 8xy6
           // If LSB of Vx is 1, set VF to 1 otherwise 0.
           // Then divide Vx by 2.
-          this.registers.VF = this.registers.V[x] & 0x1;
+          this.registers.V[0xF] = this.registers.V[x] & 0x1;
           this.registers.V[x] >>= 1;
           break;
         }
@@ -262,7 +261,7 @@ CPU.prototype.step = function() {
           // Vx from Vy and store the result in Vx.
           let Vx = this.registers.V[x];
           let Vy = this.registers.V[y];
-          this.registers.VF = Vy > Vx;
+          this.registers.V[0xF] = Vy > Vx;
           this.registers.V[x] = Vy - Vx;
           break;
         }
@@ -271,7 +270,7 @@ CPU.prototype.step = function() {
           // 8xyE
           // If MSB of Vx is 1, set VF
           // then multiply Vx by 2.
-          this.registers.VF = ((this.registers.V[x] & 0x80) === 0x80) ? 1 : 0;
+          this.registers.V[0xF] = ((this.registers.V[x] & 0x80) === 0x80) ? 1 : 0;
           this.registers.V[x] = (this.registers.V[x] << 1) & 0xFF;
           break;
         }
