@@ -722,7 +722,72 @@ describe("Chip8 CPU", function() {
 
     describe("Dxyn - DRW Vx, Vy, n", function() {
 
-      // TODO
+      beforeEach(function() {
+
+        this.sinon = sinon.sandbox.create();
+
+      });
+
+      afterEach(function(){
+
+        this.sinon.restore();
+
+      });
+
+      it("Should set VF to 1 if overwriting a sprite", function() {
+
+        let fakeDisplay = { clear: function() {}, draw: function(x, y, sprite) { } };
+        let fakeDisplayMock = this.sinon.mock(fakeDisplay);
+        fakeDisplayMock.expects("draw").once().returns(1).withExactArgs(0, 0, [0xFF]);
+
+        let origDisplay = CPU.prototype.display;
+        CPU.prototype.display = fakeDisplay;
+
+        let cpu = new CPU([
+          0xD0, 0x11
+        ]);
+
+        cpu.registers.V[0x0] = 0;
+        cpu.registers.V[0x1] = 0;
+        cpu.registers.I = 0x100;
+        cpu.memory[0x100] = 0xFF;
+
+        cpu.step();
+
+        fakeDisplayMock.verify();
+        assert.equal(cpu.registers.V[0xF], 1);
+
+        CPU.prototype.display = origDisplay;
+
+      });
+
+      it("Should pass the sprite bytes in the correct order", function() {
+
+        let fakeDisplay = { clear: function() {}, draw: function(x, y, sprite) { } };
+        let fakeDisplayMock = this.sinon.mock(fakeDisplay);
+        fakeDisplayMock.expects("draw").once().returns(1).withExactArgs(0, 0, [0xFF, 0x01]);
+
+        let origDisplay = CPU.prototype.display;
+        CPU.prototype.display = fakeDisplay;
+
+        let cpu = new CPU([
+          0xD0, 0x12
+        ]);
+
+        cpu.registers.V[0x0] = 0;
+        cpu.registers.V[0x1] = 0;
+        cpu.registers.I = 0x100;
+        cpu.memory[0x100] = 0xFF;
+        cpu.memory[0x101] = 0x01;
+
+        cpu.step();
+
+        fakeDisplayMock.verify();
+        assert.equal(cpu.registers.V[0xF], 1);
+
+        CPU.prototype.display = origDisplay;
+
+      });
 
     });
 

@@ -84,7 +84,6 @@ CPU.prototype.step = function() {
         case 0x00E0: {
 
           // CLS
-          // TODO: clear display
           this.display.clear();
           break;
 
@@ -347,7 +346,14 @@ CPU.prototype.step = function() {
 
       // Dxyn - DRW at Vx, Vy the n sprite bytes stored in I
 
-      // TODO: display collision logic
+      let x = this.registers.V[(op & 0x0F00) >> 8];
+      let y = this.registers.V[(op & 0x00F0) >> 4];
+      let n = (op & 0x000F);
+      let sprite = [];
+      while(--n >= 0) {
+        sprite.unshift(this.memory[this.registers.I + n]);
+      }
+      this.registers.V[0xF] = this.display.draw(x, y, sprite);
       break;
 
     }
