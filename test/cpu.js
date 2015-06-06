@@ -888,4 +888,33 @@ describe("Chip8 CPU", function() {
 
   });
 
+  describe("program tests", function() {
+
+    it("1", function(done) {
+
+      var cpu = new CPU([
+        0x62, 0xFE, // 200: V[2] = 0xFE
+        0x83, 0x20, // 202: V[3] = V[2]
+        0x64, 0x02, // 204: V[4] = 0x02
+        0x84, 0x33, // 206: V[4] = V[4] ^ V[3] = 0xFC
+        0x34, 0xFC, // 208: if(V[4] == 0xFC)
+        0x67, 0x11  // 210:   V[7] = 0x11 (this should be skipped)
+      ]);
+
+      cpu.run();
+
+      setTimeout(function() {
+
+        assert.equal(cpu.registers.V[2], 0xFE);
+        assert.equal(cpu.registers.V[3], 0xFE);
+        assert.equal(cpu.registers.V[4], 0xFC);
+        assert.notEqual(cpu.registers.V[7], 0x11); // should not be set to 0x11
+        done();
+
+      }, 50);
+
+    });
+
+  });
+
 });
