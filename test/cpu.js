@@ -74,7 +74,38 @@ describe("Chip8 CPU", function() {
 
     describe("00E0 - CLS", function() {
 
-      xit("should clear the display");
+      beforeEach(function() {
+
+        this.sinon = sinon.sandbox.create();
+
+      });
+
+      afterEach(function(){
+
+        this.sinon.restore();
+
+      });
+
+      it("should clear the display", function() {
+
+        let fakeDisplay = { clear: function() {}, draw: function(x, y, sprite) {} };
+        let fakeDisplayMock = this.sinon.mock(fakeDisplay);
+        fakeDisplayMock.expects('clear').once().returns();
+
+        var origDisplay = CPU.prototype.display;
+        CPU.prototype.display = fakeDisplay;
+
+        let cpu = new CPU([
+          0x00, 0xE0
+        ]);
+
+        cpu.step();
+
+        fakeDisplayMock.verify();
+
+        CPU.prototype.display = origDisplay;
+
+      });
 
     });
 

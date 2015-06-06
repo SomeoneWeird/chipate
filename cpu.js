@@ -82,15 +82,20 @@ CPU.prototype.step = function() {
       switch(bits) {
 
         case 0x00E0: {
+
           // CLS
           // TODO: clear display
+          this.display.clear();
           break;
+
         }
 
         case 0x00EE: {
+
           // Return from a subroute, set PC to top of stack.
           this.PC = this.stack.pop();
           break;
+
         }
 
       }
@@ -198,34 +203,43 @@ CPU.prototype.step = function() {
       switch(bit) {
 
         case 0x0000: {
+
           // 8xy0
           // Sets register Vx to value of Vy
           this.registers.V[x] = this.registers.V[y];
           break;
+
         }
 
         case 0x0001: {
+
           // 8xy1
           // OR Vx and Vy
           this.registers.V[x] |= this.registers.V[y];
           break;
+
         }
 
         case 0x0002: {
+
           // 8xy2
           // AND Vx and Vy
           this.registers.V[x] &= this.registers.V[y];
           break;
+
         }
 
         case 0x0003: {
+
           // 8xy3
           // XOR Vx and Vy
           this.registers.V[x] ^= this.registers.V[y];
           break;
+
         }
 
         case 0x0004: {
+
           // 8xy4
           // Add Vx and Vy, if the result is greater than 255
           // set the VF flag, only keep the lowest 8 bits.
@@ -233,9 +247,11 @@ CPU.prototype.step = function() {
           this.registers.V[0xF] = (v > 0xFF) ? 1 : 0;
           this.registers.V[x] = v & 0xFF;
           break;
+
         }
 
         case 0x0005: {
+
           // 8xy5
           // If Vx > Vy set VF flag, then subtract
           // Vy from Vx and store the result in Vx.
@@ -244,18 +260,22 @@ CPU.prototype.step = function() {
           this.registers.V[0xF] = (Vx > Vy) ? 1 : 0;
           this.registers.V[x] = Vx - Vy;
           break;
+
         }
 
         case 0x0006: {
+
           // 8xy6
           // If LSB of Vx is 1, set VF to 1 otherwise 0.
           // Then divide Vx by 2.
           this.registers.V[0xF] = this.registers.V[x] & 0x1;
           this.registers.V[x] >>= 1;
           break;
+
         }
 
         case 0x0007: {
+
           // 8xy7
           // If Vx > Vy set VF flag, then subtract
           // Vx from Vy and store the result in Vx.
@@ -264,15 +284,18 @@ CPU.prototype.step = function() {
           this.registers.V[0xF] = Vy > Vx;
           this.registers.V[x] = Vy - Vx;
           break;
+
         }
 
         case 0x000E: {
+
           // 8xyE
           // If MSB of Vx is 1, set VF
           // then multiply Vx by 2.
           this.registers.V[0xF] = ((this.registers.V[x] & 0x80) === 0x80) ? 1 : 0;
           this.registers.V[x] = (this.registers.V[x] << 1) & 0xFF;
           break;
+
         }
 
       }
@@ -322,7 +345,7 @@ CPU.prototype.step = function() {
 
     case 0xD000: {
 
-      // Dxyn
+      // Dxyn - DRW at Vx, Vy the n sprite bytes stored in I
 
       // TODO: display collision logic
       break;
@@ -339,20 +362,24 @@ CPU.prototype.step = function() {
 
       switch(bits) {
         case 0x009E: {
+
           // Ex9E
           // If key with value x is pressed
           // skip next instruction
 
           // TODO
           break;
+
         }
         case 0x00A1: {
+
           // ExA1
           // If key with value x is not pressed
           // skip next instruction
 
           // TODO
           break;
+
         }
       }
       break;
@@ -369,12 +396,14 @@ CPU.prototype.step = function() {
       switch(bits) {
 
         case 0x0007: {
+
           // Fx07
           // Set Vx to DT
 
           let x = (op & 0x0F00) >> 8;
           this.registers.V[x] = this.registers.DT;
           break;
+
         }
 
         case 0x000A: {
@@ -388,33 +417,41 @@ CPU.prototype.step = function() {
           this.run();
 
           break;
+
         }
 
         case 0x0015: {
+
           // Fx15
           // Set DT to Vx
 
           let x = (op & 0x0F00) >> 8;
           this.registers.DT = this.registers.V[x];
           break;
+
         }
 
         case 0x0018: {
+
           // Fx18
           // Set ST to Vx
           let x = (op & 0x0F00) >> 8;
           this.registers.ST = this.registers.V[x];
           break;
+
         }
 
         case 0x001E: {
+
           // Fx1E
           // Add Vx to I
           this.registers.I += this.registers.V[(op & 0x0F00) >> 8];
           break;
+
         }
 
         case 0x0029: {
+
           // Fx29
           // Set I to location of sprite for
           // digit Vx
@@ -422,9 +459,11 @@ CPU.prototype.step = function() {
           this.registers.I = (this.registers.V[x] * 5) + this.fontBase;
 
           break;
+
         }
 
         case 0x0033: {
+
           // Fx33
           // Get value from Vx, store each digit in I, I+1 & I+2
           let x = (op & 0x0F00) >> 8;
@@ -433,9 +472,11 @@ CPU.prototype.step = function() {
           this.memory[this.registers.I + 1] = (v & 0x0F0) >> 4;
           this.memory[this.registers.I + 2] = (v & 0x00F);
           break;
+
         }
 
         case 0x0055: {
+
           // Fx55
           // Store registers V0 -> Vx into memory starting at I
           let n = (op & 0x0F00) >> 8;
@@ -443,9 +484,11 @@ CPU.prototype.step = function() {
             this.memory[this.registers.I + i] = this.registers.V[i];
           }
           break;
+
         }
 
         case 0x0065: {
+
           // Fx65
           // Store memory starting at I into registers V0 -> Vx
           let n = (op & 0x0F00) >> 8;
@@ -453,6 +496,7 @@ CPU.prototype.step = function() {
             this.registers.V[i] = this.memory[this.registers.I + i];
           }
           break;
+
         }
 
       }
