@@ -1,3 +1,4 @@
+import sinon from 'sinon';
 
 import assert from "assert";
 
@@ -42,6 +43,28 @@ describe("Chip8 CPU", function() {
       assert.equal(cpu.memory[cpu.romBase + 1], 0x02);
       assert.equal(cpu.memory[cpu.romBase + 2], 0x03);
       assert.equal(cpu.memory[cpu.romBase + 3], 0x04);
+
+    });
+
+  });
+
+  describe("rng", function() {
+
+    it("should have an RNG function", function() {
+
+      let cpu = new CPU();
+
+      assert(cpu.rng);
+
+    });
+
+    it("should return an integer between 0 and 255", function() {
+
+      let cpu = new CPU();
+
+      assert(cpu.rng() >= 0);
+      assert(cpu.rng() <= 255);
+      assert(Number.isInteger(cpu.rng()));
 
     });
 
@@ -614,18 +637,53 @@ describe("Chip8 CPU", function() {
 
     describe("Cxkk - RND Vx, byte", function() {
 
-      it("should return a number and then a different number", function() {
+      beforeEach(function() {
+
+        this.sinon = sinon.sandbox.create();
+
+      });
+
+      afterEach(function(){
+
+        this.sinon.restore();
+
+      });
+
+      it("should call the RNG subsystem", function() {
+
+        let fakeRNG = this.sinon.stub(CPU.prototype, 'rng').returns(42);
 
         var cpu = new CPU([
           0xC0, 0xFF,
-          0xC1, 0xFF
         ]);
 
         assert.equal(cpu.registers.V[0], undefined);
 
         cpu.step();
 
-        assert.notEqual(cpu.registers.V[0], cpu.registers.V[1]);
+        assert(fakeRNG.called);
+        assert.equal(cpu.registers.V[0], 42);
+
+      });
+
+      it("should mask the random number", function() {
+
+        let fakeRNG = this.sinon.stub(CPU.prototype, 'rng').returns(42);
+
+        var cpu = new CPU([
+          0xC0, 0x00,
+          0xC0, 0x0F,
+        ]);
+
+        assert.equal(cpu.registers.V[0], undefined);
+
+        cpu.step();
+
+        assert.equal(cpu.registers.V[0], 0);
+
+        cpu.step();
+
+        assert.equal(cpu.registers.V[0], 42 & 0xF);
 
       });
 

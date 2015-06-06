@@ -315,7 +315,7 @@ CPU.prototype.step = function() {
       // Cxkk
       // Generate a random byte between 0 and 0xFF
       // AND with kk, then store result in Vx.
-      this.registers.V[(op & 0x0F00) >> 8] = Math.floor(Math.random() * 0x100) & (op & 0x00FF);
+      this.registers.V[(op & 0x0F00) >> 8] = this.rng() & (op & 0x00FF);
       break;
 
     }
@@ -467,6 +467,10 @@ CPU.prototype.step = function() {
 
   }
 
+};
+
+CPU.prototype.rng = function() {
+  return Math.floor(Math.random() * 0x100);
 };
 
 CPU.prototype.run = function() {
