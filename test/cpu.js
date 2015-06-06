@@ -24,8 +24,8 @@ describe("Chip8 CPU", function() {
 
       let cpu = new CPU();
 
-      assert.equal(cpu.memory[0x80], 0xF0);
-      assert.equal(cpu.memory[0x89], 0x70);
+      assert.equal(cpu.memory[0x00], 0xF0);
+      assert.equal(cpu.memory[0x09], 0x70);
 
     });
 
@@ -804,7 +804,7 @@ describe("Chip8 CPU", function() {
 
         cpu.step();
 
-        assert.equal(cpu.registers.I, 0x32 + cpu.fontBase);
+        assert.equal(cpu.registers.I, 0x32);
 
       });
 

@@ -24,7 +24,6 @@ const fontSet = [
 function CPU(rom) {
 
   this.clockSpeed = 100; // Hz
-  this.fontBase   = 0x080;
   this.romBase    = 0x200;
 
   this.reset();
@@ -48,7 +47,7 @@ CPU.prototype.reset = function() {
   this.memory = new Array(4096);
 
   for(var i = 0; i < fontSet.length; i++) {
-    this.memory[this.fontBase + i] = fontSet[i];
+    this.memory[i] = fontSet[i];
   }
 
 };
@@ -419,7 +418,7 @@ CPU.prototype.step = function() {
           // Set I to location of sprite for
           // digit Vx
           let x = (op & 0x0F00) >> 8;
-          this.registers.I = (this.registers.V[x] * 5) + this.fontBase;
+          this.registers.I = (this.registers.V[x] * 5);
 
           break;
         }
