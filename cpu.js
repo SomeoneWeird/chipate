@@ -72,13 +72,20 @@ CPU.prototype.step = function() {
   // MSB is the opcode
   let opcode = op & 0xF000;
 
+  let x   = (op & 0x0F00) >> 8;
+  let y   = (op & 0x00F0) >> 4;
+  let n   = (op & 0x000F);
+  let kk  = (op & 0x00FF);
+  let nnn = (op & 0x0FFF);
+
+  let vx = this.registers.V[x];
+  let vy = this.registers.V[y];
+
   switch(opcode) {
 
     case 0x0000: {
 
-      let bits = op & 0x00FF;
-
-      switch(bits) {
+      switch(kk) {
 
         case 0x00E0: {
 
@@ -107,7 +114,7 @@ CPU.prototype.step = function() {
       // 1nnn
       // JMP to nnn
 
-      this.PC = op & 0xFFF;
+      this.PC = nnn;
       break;
 
     }
@@ -124,7 +131,7 @@ CPU.prototype.step = function() {
         throw new Error("Stack length is over 16, aborting.");
       }
 
-      this.PC = op & 0xFFF;
+      this.PC = nnn;
       break;
 
     }
@@ -134,7 +141,7 @@ CPU.prototype.step = function() {
       // 3xkk
       // skip next instruction if Vx == kk
 
-      if(this.registers.V[(op & 0x0F00) >> 8] === (op & 0x00FF)) {
+      if(vx === kk) {
         this.PC += 2;
       }
 
@@ -147,7 +154,7 @@ CPU.prototype.step = function() {
       // 4xkk
       // skip next instruction if Vx != kk
 
-      if(this.registers.V[(op & 0x0F00) >> 8] !== (op & 0x00FF)) {
+      if(vx !== kk) {
         this.PC += 2;
       }
 
@@ -160,7 +167,7 @@ CPU.prototype.step = function() {
       // 5xy0
       // skip next instruction if Vx == Vy
 
-      if(this.registers.V[(op & 0x0F00) >> 8] == this.registers.V[(op & 0x00F0) >> 4]) {
+      if(vx == vy) {
         this.PC += 2;
       }
 
@@ -173,7 +180,7 @@ CPU.prototype.step = function() {
       // 6xkk
       // Load value kk into Vx
 
-      this.registers.V[(op & 0x0F00) >> 8] = op & 0x00FF;
+      this.registers.V[x] = kk;
       break;
 
     }
@@ -183,7 +190,7 @@ CPU.prototype.step = function() {
       // 7xkk
       // Add value kk to Vx
 
-      this.registers.V[(op & 0x0F00) >> 8] += op & 0x00FF;
+      this.registers.V[x] += kk;
       break;
 
     }
@@ -193,12 +200,7 @@ CPU.prototype.step = function() {
       // 8xyn
       // see switch statement for values of n
 
-      let bit = op & 0x000F;
-
-      let x = (op & 0x0F00) >> 8;
-      let y = (op & 0x00F0) >> 4;
-
-      switch(bit) {
+      switch(n) {
 
         case 0x0000: {
 
@@ -290,8 +292,8 @@ CPU.prototype.step = function() {
           // 8xyE
           // If MSB of Vx is 1, set VF
           // then multiply Vx by 2.
-          this.registers.V[0xF] = ((this.registers.V[x] & 0x80) === 0x80) ? 1 : 0;
-          this.registers.V[x] = (this.registers.V[x] << 1) & 0xFF;
+          this.registers.V[0xF] = ((vx & 0x80) === 0x80) ? 1 : 0;
+          this.registers.V[x] = (vx << 1) & 0xFF;
           break;
 
         }
@@ -306,7 +308,7 @@ CPU.prototype.step = function() {
 
       // 9xy0
       // Skip next instruction if Vx != Vy
-      if(this.registers.V[(op & 0x0F00) >> 8] != this.registers.V[(op & 0x00F0) >> 4]) {
+      if(vx != vy) {
         this.PC += 2;
       }
 
@@ -317,7 +319,7 @@ CPU.prototype.step = function() {
       // Annn
       // Set I to nnn
 
-      this.registers.I = op & 0x0FFF;
+      this.registers.I = nnn;
       break;
 
     }
@@ -326,7 +328,7 @@ CPU.prototype.step = function() {
 
       // Bnnn
       // PC is set to nnn + V0
-      this.PC = (op & 0x0FFF) + this.registers.V[0];
+      this.PC = nnn + this.registers.V[0];
       break;
 
     }
@@ -336,7 +338,7 @@ CPU.prototype.step = function() {
       // Cxkk
       // Generate a random byte between 0 and 0xFF
       // AND with kk, then store result in Vx.
-      this.registers.V[(op & 0x0F00) >> 8] = this.rng() & (op & 0x00FF);
+      this.registers.V[x] = this.rng() & (op & 0x00FF);
       break;
 
     }
@@ -345,14 +347,11 @@ CPU.prototype.step = function() {
 
       // Dxyn - DRW at Vx, Vy the n sprite bytes stored in I
 
-      let x = this.registers.V[(op & 0x0F00) >> 8];
-      let y = this.registers.V[(op & 0x00F0) >> 4];
-      let n = (op & 0x000F);
       let sprite = [];
       while(--n >= 0) {
         sprite.unshift(this.memory[this.registers.I + n]);
       }
-      this.registers.V[0xF] = this.display.draw(x, y, sprite);
+      this.registers.V[0xF] = this.display.draw(vx, vy, sprite);
       break;
 
     }
@@ -363,9 +362,8 @@ CPU.prototype.step = function() {
       // See switch for values of nn
 
       // TODO: input logic
-      let bits = op & 0x00FF;
 
-      switch(bits) {
+      switch(kk) {
         case 0x009E: {
 
           // Ex9E
@@ -396,16 +394,13 @@ CPU.prototype.step = function() {
       // Fxnn
       // See switch for values of nn
 
-      let bits = op & 0x00FF;
-
-      switch(bits) {
+      switch(kk) {
 
         case 0x0007: {
 
           // Fx07
           // Set Vx to DT
 
-          let x = (op & 0x0F00) >> 8;
           this.registers.V[x] = this.registers.DT;
           break;
 
@@ -430,7 +425,6 @@ CPU.prototype.step = function() {
           // Fx15
           // Set DT to Vx
 
-          let x = (op & 0x0F00) >> 8;
           this.registers.DT = this.registers.V[x];
           break;
 
@@ -440,7 +434,6 @@ CPU.prototype.step = function() {
 
           // Fx18
           // Set ST to Vx
-          let x = (op & 0x0F00) >> 8;
           this.registers.ST = this.registers.V[x];
           break;
 
@@ -450,7 +443,7 @@ CPU.prototype.step = function() {
 
           // Fx1E
           // Add Vx to I
-          this.registers.I += this.registers.V[(op & 0x0F00) >> 8];
+          this.registers.I += this.registers.V[x];
           break;
 
         }
@@ -460,7 +453,6 @@ CPU.prototype.step = function() {
           // Fx29
           // Set I to location of sprite for
           // digit Vx
-          let x = (op & 0x0F00) >> 8;
           this.registers.I = (this.registers.V[x] * 5);
 
           break;
@@ -471,11 +463,9 @@ CPU.prototype.step = function() {
 
           // Fx33
           // Get value from Vx, store each digit in I, I+1 & I+2
-          let x = (op & 0x0F00) >> 8;
-          let v = this.registers.V[x];
-          this.memory[this.registers.I    ] = (v & 0xF00) >> 8;
-          this.memory[this.registers.I + 1] = (v & 0x0F0) >> 4;
-          this.memory[this.registers.I + 2] = (v & 0x00F);
+          this.memory[this.registers.I    ] = (vx & 0xF00) >> 8;
+          this.memory[this.registers.I + 1] = (vx & 0x0F0) >> 4;
+          this.memory[this.registers.I + 2] = (vx & 0x00F);
           break;
 
         }
@@ -484,8 +474,7 @@ CPU.prototype.step = function() {
 
           // Fx55
           // Store registers V0 -> Vx into memory starting at I
-          let n = (op & 0x0F00) >> 8;
-          for(let i = 0; i < n; i++) {
+          for(let i = 0; i < x; i++) {
             this.memory[this.registers.I + i] = this.registers.V[i];
           }
           break;
@@ -496,8 +485,7 @@ CPU.prototype.step = function() {
 
           // Fx65
           // Store memory starting at I into registers V0 -> Vx
-          let n = (op & 0x0F00) >> 8;
-          for(let i = 0; i < n; i++) {
+          for(let i = 0; i < x; i++) {
             this.registers.V[i] = this.memory[this.registers.I + i];
           }
           break;
