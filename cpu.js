@@ -361,30 +361,38 @@ CPU.prototype.step = function() {
       // Exnn
       // See switch for values of nn
 
-      // TODO: input logic
-
       switch(kk) {
+
         case 0x009E: {
 
           // Ex9E
           // If key with value x is pressed
           // skip next instruction
 
-          // TODO
+          if(this.input.isKeyDown(x)) {
+            this.PC += 2;
+          }
+
           break;
 
         }
+
         case 0x00A1: {
 
           // ExA1
           // If key with value x is not pressed
           // skip next instruction
 
-          // TODO
+          if(!this.input.isKeyDown(x)) {
+            this.PC += 2;
+          }
+
           break;
 
         }
+
       }
+
       break;
 
     }
