@@ -1,10 +1,13 @@
 
 import Display from "./display";
 
+const EMPTY_MEM_FUNC = function () { return (new Array(64*32+1)).join(0).split('').map(function(num) { return parseInt(num, 10); }); };
+
 class ConsoleDisplay extends Display {
 
   constructor() {
     super();
+    this.memory = EMPTY_MEM_FUNC();
     this._log = console.log;
   }
 
@@ -17,7 +20,7 @@ class ConsoleDisplay extends Display {
   }
 
   clear() {
-    super.clear();
+    this.memory = EMPTY_MEM_FUNC();
     this._draw();
   }
 
